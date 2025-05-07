@@ -78,30 +78,92 @@ const CourseInfo = {
 
   //structure data to array of obejects
 
-  let learnerScore ={}; //object will store learner id and score
+const today = new Date();
+const validAssignments = [];
 
-  for (let j = 0; j < LearnerSubmissions.length; j++) { 
-    let submission = LearnerSubmissions[j]; // Declare submission inside the outer loop
+for (let i = 0; i < AssignmentGroup.assignments.length; i++) {
+    let assignmentDueDate = new Date(AssignmentGroup.assignments[i].due_at);
+    if (assignmentDueDate <= today) {
+        validAssignments.push(AssignmentGroup.assignments[i]); // Add to valid assignments
+    }
+}
+
+console.log(validAssignments);
+
+  
+  
+let learnerScore = {}; // Object to store learner ID and scores
+
+let j = 0;
+while (j < LearnerSubmissions.length) {
+    let submission = LearnerSubmissions[j]; // Declare submission inside the loop
 
     let assignment = null;
+    let i = 0;
 
-    // Iterate over assignments to find the matching one
-    for (let i = 0; i < AssignmentGroup.assignments.length; i++) {
+    // goes over assignments to find the matching one
+    while (i < AssignmentGroup.assignments.length) {
         if (AssignmentGroup.assignments[i].id === submission.assignment_id) {
             assignment = AssignmentGroup.assignments[i];
             break; // Stop the loop once a match is found
         }
+        i++; // increase index for assignments loop
     }
 
     console.log(`Learner ID: ${submission.learner_id}, Assignment:`, assignment);
+
+    j++; // Increase outer loop
 }
 
 
 
+let learnerScores = {};
+
+for (let j = 0; j < LearnerSubmissions.length; j++) { 
+    let submission = LearnerSubmissions[j]; 
+    let assignment = validAssignments.find(a => a.id === submission.assignment_id); // Use valid assignments
+
+    if (!assignment) continue; // Skip assignments that aren’t due
+
+    if (!learnerScores[submission.learner_id]) {
+        learnerScores[submission.learner_id] = { id: submission.learner_id, avg: 0, totalPoints: 0, earnedPoints: 0 };
+    }
+
+    let score = submission.submission.score;
+
+ 
+    // Store the percentage score per assignment
+    learnerScores[submission.learner_id][assignment.id] = (score / assignment.points_possible) * 100;
+
+    // // Accumulate points for weighted average 
+    learnerScores[submission.learner_id].earnedPoints += score;
+    learnerScores[submission.learner_id].totalPoints += assignment.points_possible;
+}
+Object.values(learnerScores).forEach(learner => {
+    learner.avg = (learner.earnedPoints / learner.totalPoints) * 100;
+
+});
+
+console.log(Object.values(learnerScores));
 
 
 
 
+
+
+
+
+
+// //final average
+// const learnersArray = Object.values(LearnerSubmissions.score); //takes object "learnerScores" and returns an array containing all the values of that object
+
+
+// for (let i = 0; i < learnersArray.length; i++) {
+//     let learner = learnersArray[i];
+//     learner.avg = (learner.earnedPoints / learner.totalPoints) * 100;
+//     delete learner.totalPoints;
+//     delete learner.earnedPoints;
+// }
 
 
 
